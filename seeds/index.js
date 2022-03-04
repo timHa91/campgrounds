@@ -33,6 +33,8 @@ const seedDB = async () => {
     }
 }
 
+//Promise: Callback-Funktionen, die in .then() angehängt werden, 
+//werden nach dem Ende der asynchronen Operation aufgerufen.
 seedDB().then(() => {
     mongoose.connection.close()
 });
