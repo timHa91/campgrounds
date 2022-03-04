@@ -35,6 +35,11 @@ app.get('/campgrounds', async (req, res) => {
     res.render('campgrounds/index', { campgrounds });
 });
 
+app.get('/campgrounds/:id', async (req, res) => {
+    const campground = await Campground.findById(req.params.id);
+    res.render('campgrounds/show', { campground });
+});
+
 //app.listen() is the function that starts a port and host, in our case the localhost for the connections to listen 
 //to incoming requests from a client. We can define the port number such as 3000.
 app.listen(3000, () => {
