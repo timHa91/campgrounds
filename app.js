@@ -3,6 +3,7 @@ const path = require('path');
 const mongoose = require('mongoose');
 const Campground = require('./models/campground');
 const exp = require('constants');
+const methodOverride = require('method-override');
 
 //This is the minimum needed to connect the yelp-camp database
 mongoose.connect('mongodb://localhost:27017/tim-camp', {
@@ -31,7 +32,7 @@ app.set('views', path.join(__dirname, 'views'));
 //Express provides you with middleware to deal with the (incoming) data (object) in the body of the request.
 //urlencoded is a method inbuilt in express to recognize the incoming Request Object as strings or arrays.
 app.use(express.urlencoded({ extended: true }));
-
+app.use(methodOverride('_method'));
 
 
 //The req object represents the HTTP request and has properties for the request query string, parameters, body, and HTTP headers. 
@@ -61,6 +62,17 @@ app.post('/campgrounds', async (req, res) => {
 app.get('/campgrounds/:id', async (req, res) => {
     const campground = await Campground.findById(req.params.id);
     res.render('campgrounds/show', { campground });
+});
+
+app.get('/campgrounds/:id/edit', async (req, res) => {
+    const campground = await Campground.findById(req.params.id);
+    res.render('campgrounds/edit', { campground });
+});
+
+app.put('/campgrounds/:id', async (req, res) => {
+    const { id } = req.params;
+    const campground = await Campground.findByIdAndUpdate(id, { ...req.body.campground });
+    res.redirect(`/campgrounds/${campground._id}`);
 });
 
 //app.listen() is the function that starts a port and host, in our case the localhost for the connections to listen 
