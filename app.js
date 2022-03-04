@@ -75,6 +75,12 @@ app.put('/campgrounds/:id', async (req, res) => {
     res.redirect(`/campgrounds/${campground._id}`);
 });
 
+app.delete('/campgrounds/:id', async (req, res) => {
+    const { id } = req.params;
+    await Campground.findByIdAndDelete(id);
+    res.redirect('/campgrounds');
+});
+
 //app.listen() is the function that starts a port and host, in our case the localhost for the connections to listen 
 //to incoming requests from a client. We can define the port number such as 3000.
 app.listen(3000, () => {
