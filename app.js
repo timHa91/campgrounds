@@ -4,7 +4,7 @@ const mongoose = require('mongoose');
 const Campground = require('./models/campground');
 const methodOverride = require('method-override');
 const ejsMate = require('ejs-mate');
-const Joi = require('joi');
+const { campgroundSchema } = require('./schemas.js');
 const catchAsync = require('./utils/catchAsync');
 const ExpressError = require('./utils/ExpressError');
 
@@ -38,7 +38,17 @@ app.set('views', path.join(__dirname, 'views'));
 app.use(express.urlencoded({ extended: true }));
 app.use(methodOverride('_method'));
 
-
+const validateCampground = (req, res, next) => {
+        // now we validate our data with joi
+       const { error } = campgroundSchema.validate(req.body);
+        if(error) {
+            // error.details contains an array and for every object in the array we take the message and join a ,
+            const msg = error.details.map(el => el.message).join(',')
+            throw new ExpressError(msg, 400);
+        }
+        // if we wanna go to the route handler we need to call next!
+        else next();
+}
 //The req object represents the HTTP request and has properties for the request query string, parameters, body, and HTTP headers. 
 //The res object represents the HTTP response that an Express app sends when it gets an HTTP request. 
 app.get('/', (req, res) => {
@@ -54,25 +64,10 @@ app.get('/campgrounds/new', (req, res) => {
     res.render('campgrounds/new');
 });
 
-app.post('/campgrounds', catchAsync(async (req, res, next) => {
+app.post('/campgrounds', validateCampground, catchAsync(async (req, res, next) => {
     //req.body.campground { title: 'hallo', location: 'hallo' }
     // catchAsync is going to catch the error and hand it over to next
     // if(!req.body.campground) throw new ExpressError('Invalid Campground Data', 400)
-    // now we validate our data with joi
-    const campgroundSchema = Joi.object({
-        campground: Joi.object({
-            title: Joi.string().required(),
-            price: Joi.number().required().min(0),
-
-        }).required()
-    })
-    const { error } = campgroundSchema.validate(req.body)
-    console.log(result)
-    if(error) {
-        // error.details contains an array and for every object in the array we take the message and join a ,
-        const msg = error.details.map(el => el.message).join(',')
-        throw new ExpressError(msg, 400);
-    }
     const campground = new Campground(req.body.campground);
     await campground.save();
     //campground._id ist die DB Eintrag id
@@ -90,7 +85,7 @@ app.get('/campgrounds/:id/edit', catchAsync(async (req, res) => {
     res.render('campgrounds/edit', { campground });
 }));
 
-app.put('/campgrounds/:id', catchAsync(async (req, res) => {
+app.put('/campgrounds/:id', validateCampground, catchAsync(async (req, res) => {
     const { id } = req.params;
     const campground = await Campground.findByIdAndUpdate(id, { ...req.body.campground });
     res.redirect(`/campgrounds/${campground._id}`);
