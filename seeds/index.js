@@ -4,7 +4,7 @@ const cities = require('./cities');
 const Campground = require('../models/campground');
 const { places, descriptors } = require('./seedHelpers');
 
-mongoose.connect('mongodb://localhost:27017/tim-camp');
+mongoose.connect('mongodb://localhost:27018/yelp-camp');
 
 const db = mongoose.connection;
 db.on("error", console.error.bind(console, "connection.error:"));
@@ -24,10 +24,14 @@ const seedDB = async () => {
         //random1000 = 1000 verschieden Citties in dem cities.js array
         //Wählt als eine zufällige nummer zwischen 0 und 999
         const random1000 = Math.floor(Math.random() * 1000);
-        //Erstellt neuen campground mit location: 
+        const price = Math.floor(Math.random()*20) + 10;
+        //Erstellt neuen campground mit location title, image, etc: 
         const camp = new Campground({
             location: `${cities[random1000].city}, ${cities[random1000].state}`,
-            title: `${sample(descriptors)} ${sample(places)}`
+            title: `${sample(descriptors)} ${sample(places)}`,
+            image: 'https://source.unsplash.com/collection/483251',
+            description: 'Lorem ipsum dolor sit amet consectetur adipisicing elit. Sapiente quas repudiandae delectus nihil, molestias, iure placeat porro tempore dolorum saepe ex. Blanditiis, libero? Animi, qui perspiciatis rerum tenetur est ratione.',
+            price
         })
         await camp.save();
     }
